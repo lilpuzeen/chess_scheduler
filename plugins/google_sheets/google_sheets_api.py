@@ -1,14 +1,8 @@
-import gspread
 from google.oauth2.service_account import Credentials
+from plugins.config import settings
+from datetime import datetime
 
-from plugins.config import (
-	GOOGLE_PRIVATE_KEY,
-	GOOGLE_PRIVATE_KEY_ID,
-	GOOGLE_CLIENT_EMAIL,
-	GOOGLE_CLIENT_ID,
-	GOOGLE_TOKEN_URI,
-	GOOGLE_SHEET_ID
-)
+import gspread
 
 scopes = ["https://www.googleapis.com/auth/spreadsheets"]
 credentials = Credentials.from_service_account_info(
@@ -25,3 +19,14 @@ client = gspread.authorize(credentials)
 
 sheet_id = settings.GOOGLE_SHEET_ID
 wb = client.open_by_key(sheet_id)
+
+
+def get_time_control() -> str:
+	ws = wb.worksheet("Весна 2023/2024")
+	today = datetime.now().strftime("%d.%m")
+	time_control = ws.cell(ws.find(today).row, 4).value.split("+")
+	return f"{{min: {int(time_control[0].strip())}, sec: {int(time_control[1].strip())}}}"
+
+
+if __name__ == '__main__':
+    print(get_time_control())
